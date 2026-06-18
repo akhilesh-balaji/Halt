@@ -1,0 +1,19 @@
+name = "Halt"
+version = "0.1.0"
+defaultTargets = ["halt"]
+
+[[lean_lib]]
+name = "Halt"
+
+[[lean_exe]]
+name = "halt"
+root = "Main"
+
+[[require]]
+name = "cslib"
+scope = "leanprover"
+rev = "main"
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
