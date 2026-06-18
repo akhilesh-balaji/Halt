@@ -55,8 +55,11 @@ def IsSelfHaltDecider (D : SingleTapeTM Bool) : Prop :=
 
 /-- **The Halting Problem is undecidable**: no `SingleTapeTM Bool` can
 decide the self-halt problem `K`. -/
-theorem halt_undecidable :
+theorem self_halt_undecidable :
     ¬ ∃ D : SingleTapeTM Bool, IsSelfHaltDecider D := by sorry
+
+theorem halt_undecidable :
+    ¬ ∃ D : SingleTapeTM Bool, IsHaltDecider D := by sorry
 
 end Halt
 
