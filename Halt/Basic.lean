@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2026 Aalok Thakkar. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Aalok Thakkar and Akhilesh Balaji
+-/
+
 import Cslib.Computability.Machines.SingleTapeTuring.Basic
 import Halt.Encoding
 
@@ -52,14 +58,6 @@ def IsSelfHaltDecider (D : SingleTapeTM Bool) : Prop :=
       SingleTapeTM.Outputs D (encodeBoolTM tm) [true]) ∧
     (¬ Halts tm (encodeBoolTM tm) →
       SingleTapeTM.Outputs D (encodeBoolTM tm) [false])
-
-/-- **The Halting Problem is undecidable**: no `SingleTapeTM Bool` can
-decide the self-halt problem `K`. -/
-theorem self_halt_undecidable :
-    ¬ ∃ D : SingleTapeTM Bool, IsSelfHaltDecider D := by sorry
-
-theorem halt_undecidable :
-    ¬ ∃ D : SingleTapeTM Bool, IsHaltDecider D := by sorry
 
 end Halt
 
