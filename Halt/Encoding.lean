@@ -4,12 +4,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Akhilesh Balaji
 -/
 
-import Cslib.Computability.Machines.SingleTapeTuring.Basic
+import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
 import Mathlib.Data.Nat.Bits
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
-open Turing SingleTapeTM
+open Cslib.Turing SingleTapeTM
 
 namespace Halt.Encoding
 
@@ -65,19 +65,15 @@ private lemma foldl_eq (w : List Bool) (k : ℕ) :
     rw [ih, ih']
     ring
 
-@[simp]
-lemma unenumeratedBinaryString_enumeratedBinaryString (w : List Bool) :
-    unenumeratedBinaryString (enumeratedBinaryString w) = w := by sorry
-
 noncomputable def symbolIdx [DecidableEq Symbol] (s : Option Symbol) : ℕ :=
   match s with
   | none   => 1
   | some s => (Fintype.equivFin Symbol s).val + 2
 
-def dirIdx (d : Option Dir) : ℕ :=
+def dirIdx (d : Option Turing.Dir) : ℕ :=
   match d with
-  | some Dir.left  => 1
-  | some Dir.right => 2
+  | some Turing.Dir.left  => 1
+  | some Turing.Dir.right => 2
   | none           => 3
 
 def boolSymbolIdx (s : Option Bool) : ℕ :=
@@ -104,9 +100,6 @@ noncomputable def encodeBoolTransition (tm : SingleTapeTM Bool) [DecidableEq tm.
   encodeNat k ++ [true] ++
   encodeNat l ++ [true] ++
   encodeNat m
-
-noncomputable def decodeBoolTransition (w : List Bool) : SingleTapeTM Bool :=
-  sorry
 
 noncomputable def encodeBoolTr (tm : SingleTapeTM Bool) [DecidableEq tm.State] : List Bool :=
   let states := (@Finset.univ tm.State tm.stateFintype).toList

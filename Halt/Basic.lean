@@ -4,12 +4,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Aalok Thakkar and Akhilesh Balaji
 -/
 
-import Cslib.Computability.Machines.SingleTapeTuring.Basic
+import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
 import Halt.Encoding
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
-open Turing SingleTapeTM Halt.Encoding
+open Cslib.Turing SingleTapeTM Halt.Encoding
 
 namespace Halt
 

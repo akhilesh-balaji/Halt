@@ -3,4 +3,5 @@
 import Halt.Basic
 import Halt.Encoding
 import Halt.Diagonal
+import Halt.Compositions
 import Halt.Undecidable

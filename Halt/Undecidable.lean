@@ -1,17 +1,18 @@
 /-
-Copyright (c) 2026 Aalok Thakkar. All rights reserved.
+Copyright (c) 2026 Aalok Thakkar and Akhilesh Balaji. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Aalok Thakkar and Akhilesh Balaji
 -/
 
-import Cslib.Computability.Machines.SingleTapeTuring.Basic
+import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
 import Halt.Basic
 import Halt.Encoding
 import Halt.Diagonal
+import Halt.Compositions
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
-open Turing SingleTapeTM Halt.Encoding
+open Cslib.Turing SingleTapeTM Halt.Encoding Halt.Compositions
 
 @[expose] public section
 
@@ -228,12 +229,11 @@ private lemma diagTM_loops_of_outputs_true
       simp at h_eq
     · simp [SingleTapeTM.TransitionRelation, SingleTapeTM.step] at h_step'
 
-/-- **The Halting Problem is undecidable**: no `SingleTapeTM Bool` can
+/-- **The Self-Halting Problem is undecidable**: no `SingleTapeTM Bool` can
 decide the self-halt problem `K`. -/
 theorem self_halt_undecidable :
     ¬ ∃ D : SingleTapeTM Bool, IsSelfHaltDecider D := by
   rintro ⟨D, h_dec⟩
-  -- Construct the diagonal TM and its code.
   haveI : DecidableEq D.State := Classical.decEq _  
   let c_diag := diagTM D
   haveI : DecidableEq c_diag.State := by show DecidableEq (D.State ⊕ DiagPost); exact inferInstance
@@ -241,16 +241,30 @@ theorem self_halt_undecidable :
   by_cases h_halts : Halts c_diag (encodeBoolTM c_diag)
   · -- D outputs [true] on `encodeBoolTM c_diag`.
     have h_out_true := h_pos h_halts
-    -- By `halts_codeOf_iff`, diagTM halts on `encodeTMCode c_diag`.
     have h_diag_halts : Halts (diagTM D) (encodeBoolTM c_diag) := by grind
-    -- But Outputs D w [true] forbids diagTM from halting.
     exact diagTM_loops_of_outputs_true D h_out_true h_diag_halts
   · -- D outputs [false] on `encodeBoolTM c_diag`.
     have h_out_false := h_neg h_halts
     have h_diag_halts := diagTM_halts_of_outputs_false D h_out_false
-    grind
+    exact h_halts h_diag_halts
 
+lemma self_halt_decider_if_halt_decider {D} (h : IsHaltDecider D) : ∃ D' :
+    SingleTapeTM Bool, IsSelfHaltDecider D' := -- sorry
+  ⟨compComputer pairSelfTM D, fun M => by
+    haveI : DecidableEq M.State := Classical.decEq _
+    intro _
+    obtain ⟨h_pos, h_neg⟩ := h M (encodeBoolTM M)
+    constructor
+    · intro hM
+      exact compComputer_seq_outputs (pairSelfTM_outputs _) (h_pos hM)
+    · intro hM
+      exact compComputer_seq_outputs (pairSelfTM_outputs _) (h_neg hM)⟩
+
+/-- **The Halting Problem is undecidable**: no `SingleTapeTM Bool` can
+decide the self-halt problem `K`. -/
 theorem halt_undecidable :
-    ¬ ∃ D : SingleTapeTM Bool, IsHaltDecider D := by sorry
+    ¬ ∃ D : SingleTapeTM Bool, IsHaltDecider D := by
+  rintro ⟨D, h_dec⟩
+  exact self_halt_undecidable (self_halt_decider_if_halt_decider h_dec)
 
 end Halt.Undecidable
