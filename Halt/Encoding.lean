@@ -5,7 +5,6 @@ Authors: Akhilesh Balaji
 -/
 
 import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
-import Mathlib.Data.Nat.Bits
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
@@ -26,7 +25,6 @@ tape symbols can be assigned to the remaining integers arbitrarily. We shall ref
 D1 and direction R as D2. The encoding is an injection. -/
 
 def encodeNat (n : ℕ) : List Bool := List.replicate n false
-#eval encodeNat 3
 
 @[simp]
 lemma encodeNat_zero : encodeNat 0 = [] := rfl

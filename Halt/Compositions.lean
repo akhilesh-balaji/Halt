@@ -6,10 +6,8 @@ Authors: Akhilesh Balaji and Aristotle (Harmonic).
 
 import Mathlib.Tactic
 
-import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
 import Halt.Basic
-import Halt.Encoding
-import Halt.Diagonal
+import Mathlib.Data.Nat.SuccPred
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
