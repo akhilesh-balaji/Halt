@@ -45,19 +45,45 @@ def HaltDecidable (Symbol : Type) [Inhabited Symbol] [Fintype Symbol] : Prop :=
   ∃ decide : SingleTapeTM Symbol → List Symbol → Bool,
     ∀ tm w, decide tm w = true ↔ Halts tm w
 
-def IsHaltDecider (D : SingleTapeTM Bool) : Prop :=
+/-- **`IsHaltDeciderBool D`** (pair form, "HALT_TM") for Boolean TMs. -/
+def IsHaltDeciderBool (D : SingleTapeTM Bool) : Prop :=
   ∀ (tm : SingleTapeTM Bool) [DecidableEq tm.State] (w : List Bool),
     (Halts tm w →
       SingleTapeTM.Outputs D (encodePair (encodeBoolTM tm) w) [true]) ∧
     (¬ Halts tm w →
       SingleTapeTM.Outputs D (encodePair (encodeBoolTM tm) w) [false])
 
-def IsSelfHaltDecider (D : SingleTapeTM Bool) : Prop :=
+/-- **`IsSelfHaltDeciderBool D`** (self-halt form, "K") for Boolean TMs. -/
+def IsSelfHaltDeciderBool (D : SingleTapeTM Bool) : Prop :=
   ∀ (tm : SingleTapeTM Bool) [DecidableEq tm.State],
     (Halts tm (encodeBoolTM tm) →
       SingleTapeTM.Outputs D (encodeBoolTM tm) [true]) ∧
     (¬ Halts tm (encodeBoolTM tm) →
       SingleTapeTM.Outputs D (encodeBoolTM tm) [false])
+
+/-- Encode a `List Bool` into a `List Symbol` using unary encoding. -/
+def encodeListBool {Symbol} [Inhabited Symbol] (l : List Bool) : List Symbol :=
+  List.replicate (enumeratedBinaryString l) default
+
+/-- **`IsHaltDecider D`** (pair form, "HALT_TM"): the single-tape TM
+`D` over `Symbol`, when run on the encoded pair `(tm, w)`, halts with
+output `encodeListBool [true]` if `tm` halts on `w`, and `encodeListBool [false]` otherwise. -/
+def IsHaltDecider {Symbol} [Inhabited Symbol] [Fintype Symbol] (D : SingleTapeTM Symbol) : Prop :=
+  ∀ (tm : SingleTapeTM Bool) [DecidableEq tm.State] (w : List Bool),
+    (Halts tm w →
+      SingleTapeTM.Outputs D (encodeListBool (encodePair (encodeBoolTM tm) w)) (encodeListBool [true])) ∧
+    (¬ Halts tm w →
+      SingleTapeTM.Outputs D (encodeListBool (encodePair (encodeBoolTM tm) w)) (encodeListBool [false]))
+
+/-- **`IsSelfHaltDecider D`** (self-halt form, "K"): `D` decides
+whether a `SingleTapeTM Bool` `tm` halts on its own description `encodeBoolTM tm`,
+by emitting `encodeListBool [true]` / `encodeListBool [false]` on its output tape. -/
+def IsSelfHaltDecider {Symbol} [Inhabited Symbol] [Fintype Symbol] (D : SingleTapeTM Symbol) : Prop :=
+  ∀ (tm : SingleTapeTM Bool) [DecidableEq tm.State],
+    (Halts tm (encodeBoolTM tm) →
+      SingleTapeTM.Outputs D (encodeListBool (encodeBoolTM tm)) (encodeListBool [true])) ∧
+    (¬ Halts tm (encodeBoolTM tm) →
+      SingleTapeTM.Outputs D (encodeListBool (encodeBoolTM tm)) (encodeListBool [false]))
 
 end Halt
 

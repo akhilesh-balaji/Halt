@@ -5,3 +5,4 @@ import Halt.Encoding
 import Halt.Diagonal
 import Halt.Compositions
 import Halt.Undecidable
+import Halt.Helpers

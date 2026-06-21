@@ -9,6 +9,7 @@ import Halt.Basic
 import Halt.Encoding
 import Halt.Diagonal
 import Halt.Compositions
+import Halt.Helpers
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
@@ -231,8 +232,8 @@ private lemma diagTM_loops_of_outputs_true
 
 /-- **The Self-Halting Problem is undecidable**: no `SingleTapeTM Bool` can
 decide the self-halt problem `K`. -/
-theorem self_halt_undecidable :
-    ¬ ∃ D : SingleTapeTM Bool, IsSelfHaltDecider D := by
+theorem self_halt_undecidable_bool :
+    ¬ ∃ D : SingleTapeTM Bool, IsSelfHaltDeciderBool D := by
   rintro ⟨D, h_dec⟩
   haveI : DecidableEq D.State := Classical.decEq _  
   let c_diag := diagTM D
@@ -248,8 +249,8 @@ theorem self_halt_undecidable :
     have h_diag_halts := diagTM_halts_of_outputs_false D h_out_false
     exact h_halts h_diag_halts
 
-lemma self_halt_decider_if_halt_decider {D} (h : IsHaltDecider D) : ∃ D' :
-    SingleTapeTM Bool, IsSelfHaltDecider D' := -- sorry
+lemma self_halt_decider_if_halt_decider {D} (h : IsHaltDeciderBool D) : ∃ D' :
+    SingleTapeTM Bool, IsSelfHaltDeciderBool D' := -- sorry
   ⟨compComputer pairSelfTM D, fun M => by
     haveI : DecidableEq M.State := Classical.decEq _
     intro _
@@ -262,9 +263,25 @@ lemma self_halt_decider_if_halt_decider {D} (h : IsHaltDecider D) : ∃ D' :
 
 /-- **The Halting Problem is undecidable**: no `SingleTapeTM Bool` can
 decide the self-halt problem `K`. -/
-theorem halt_undecidable :
-    ¬ ∃ D : SingleTapeTM Bool, IsHaltDecider D := by
+theorem halt_undecidable_bool :
+    ¬ ∃ D : SingleTapeTM Bool, IsHaltDeciderBool D := by
   rintro ⟨D, h_dec⟩
-  exact self_halt_undecidable (self_halt_decider_if_halt_decider h_dec)
+  exact self_halt_undecidable_bool (self_halt_decider_if_halt_decider h_dec)
+
+/-- **The Self-Halting Problem is undecidable for arbitrary alphabets**: no `SingleTapeTM Symbol` can
+decide the self-halt problem `K`. -/
+theorem self_halt_undecidable :
+    ¬ ∃ D : SingleTapeTM Symbol, IsSelfHaltDecider D := by
+  rintro h
+  have ⟨D', h'⟩ := Halt.Helpers.decider_equiv_self_halt.mp h
+  exact self_halt_undecidable_bool ⟨D', h'⟩
+
+/-- **The Halting Problem is undecidable for arbitrary alphabets**: no `SingleTapeTM Symbol` can
+decide the halt problem `HALT`. -/
+theorem halt_undecidable :
+    ¬ ∃ D : SingleTapeTM Symbol, IsHaltDecider D := by
+  rintro h
+  have ⟨D', h'⟩ := Halt.Helpers.decider_equiv_halt.mp h
+  exact halt_undecidable_bool ⟨D', h'⟩
 
 end Halt.Undecidable
