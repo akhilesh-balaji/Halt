@@ -6,6 +6,7 @@ Authors: Aalok Thakkar and Akhilesh Balaji
 
 import Halt.Compositions
 
+
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
 open Cslib.Turing SingleTapeTM Halt.Encoding Halt.Compositions
@@ -14,18 +15,6 @@ open Cslib.Turing SingleTapeTM Halt.Encoding Halt.Compositions
 
 namespace Halt.Undecidable
 
-private lemma reflTransGen_diamond {α : Type*} {r : α → α → Prop}
-    (h_det : ∀ {a b c : α}, r a b → r a c → b = c) {a b c : α}
-    (hab : Relation.ReflTransGen r a b)
-    (hac : Relation.ReflTransGen r a c) :
-    Relation.ReflTransGen r b c ∨ Relation.ReflTransGen r c b := by
-  induction hab with
-  | refl => grind
-  | @tail b_int b_end h_rest h_step ih =>
-    cases ih with
-    | inr h_c_b_int => grind
-    | inl h_b_int_c =>
-      rcases h_b_int_c.cases_head with h_eq | ⟨x, h_b_int_x, h_x_c⟩ <;> grind
 
 /-- `SingleTapeTM.TransitionRelation` is deterministic. -/
 private lemma transitionRelation_det {tm : SingleTapeTM Bool}
@@ -230,7 +219,7 @@ decide the self-halt problem `K`. -/
 theorem self_halt_undecidable :
     ¬ ∃ D : SingleTapeTM Bool, IsSelfHaltDecider D := by
   rintro ⟨D, h_dec⟩
-  haveI : DecidableEq D.State := Classical.decEq _  
+  haveI : DecidableEq D.State := Classical.decEq _
   let c_diag := diagTM D
   haveI : DecidableEq c_diag.State := by show DecidableEq (D.State ⊕ DiagPost); exact inferInstance
   obtain ⟨h_pos, h_neg⟩ := h_dec c_diag
