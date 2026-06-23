@@ -9,6 +9,8 @@ import Mathlib.Tactic
 import Halt.Basic
 import Mathlib.Data.Nat.SuccPred
 
+import Halt.Helpers
+
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
 open Cslib.Turing SingleTapeTM Halt.Encoding
@@ -90,6 +92,8 @@ When the head, in state `start`, finds a blank (it has reached position `n`), th
 fully copied: the tape reads `w ⊔ ⊔ w`.  The machine writes `true` into the two gap cells
 (turning `⊔ ⊔` into `true true`), then walks left to the leftmost cell and halts, leaving
 `w ++ [true, true] ++ w`.  -/
+
+
 inductive PairSelfState where
   | start
   | fwd1 (c : Bool) | fwd2 (c : Bool) | fwd3 (c : Bool)
@@ -124,6 +128,7 @@ def pairSelfTM : SingleTapeTM Bool := {
         | some _ => (⟨sym, some .left⟩, some .finL)
         | none   => (⟨none, some .right⟩, none)
 }
+
 
 namespace PairSelf
 open PairSelfState
@@ -419,34 +424,20 @@ private lemma mk₁_injective {l l' : List Symbol} (h : BiTape.mk₁ l = BiTape.
       subst this; rfl
 
 /-- The transition relation of `pairSelfTM` is deterministic. -/
-private lemma pairSelfTM_det {a b c : pairSelfTM.Cfg}
+lemma pairSelfTM_det {a b c : pairSelfTM.Cfg}
     (hab : pairSelfTM.TransitionRelation a b) (hac : pairSelfTM.TransitionRelation a c) :
     b = c := by
   simp only [SingleTapeTM.TransitionRelation] at hab hac
   rw [hab] at hac
   exact Option.some.injEq _ _ |>.mp hac
 
-/-- TODO: This references private lemma reflTransGen_diamond in Halt.Undecidable. Make these both
-    public lemmas in Halt.Helpers. -/
-private lemma reflTransGen_out_unique {a b c : pairSelfTM.Cfg}
+lemma pairSelfTM_reflTransGen_out_unique {a b c : pairSelfTM.Cfg}
     (hb : b.state = none) (hc : c.state = none)
     (hab : Relation.ReflTransGen pairSelfTM.TransitionRelation a b)
     (hac : Relation.ReflTransGen pairSelfTM.TransitionRelation a c) :
     b = c := by
   -- diamond argument: one of `b →* c` or `c →* b`; both halt, so equal.
-  have diamond : Relation.ReflTransGen pairSelfTM.TransitionRelation b c ∨
-      Relation.ReflTransGen pairSelfTM.TransitionRelation c b := by
-    clear hb hc
-    induction hab with
-    | refl => exact Or.inl hac
-    | @tail b_int b_end _ h_step ih =>
-      cases ih with
-      | inr h => exact Or.inr (h.tail h_step)
-      | inl h =>
-        rcases h.cases_head with h_eq | ⟨x, h1, h2⟩
-        · exact Or.inr (h_eq ▸ Relation.ReflTransGen.refl.tail h_step)
-        · have : b_end = x := pairSelfTM_det h_step h1
-          exact Or.inl (this ▸ h2)
+  have diamond := reflTransGen_diamond (r := pairSelfTM.TransitionRelation) pairSelfTM_det hab hac
   rcases diamond with h | h
   · rcases h.cases_head with h_eq | ⟨x, h1, _⟩
     · exact h_eq
@@ -461,11 +452,12 @@ private lemma reflTransGen_out_unique {a b c : pairSelfTM.Cfg}
       subst hc
       simp [SingleTapeTM.TransitionRelation, SingleTapeTM.step] at h1
 
+
 theorem pairSelfTM_correct (w : List Bool) :
     Halts pairSelfTM w ∧ ∀ out, pairSelfTM.Outputs w out ↔ out = encodePair w w := by
   refine ⟨pairSelfTM_halts w, fun out => ⟨fun hOut => ?_, fun hEq => hEq ▸ pairSelfTM_outputs w⟩⟩
   -- Determinism: any output equals `encodePair w w`.
-  have h := reflTransGen_out_unique (b := SingleTapeTM.haltCfg pairSelfTM out)
+  have h := pairSelfTM_reflTransGen_out_unique (b := SingleTapeTM.haltCfg pairSelfTM out)
     (c := SingleTapeTM.haltCfg pairSelfTM (encodePair w w)) rfl rfl hOut (pairSelfTM_outputs w)
   have : BiTape.mk₁ out = BiTape.mk₁ (encodePair w w) := by
     simpa [SingleTapeTM.haltCfg] using congrArg SingleTapeTM.Cfg.BiTape h
