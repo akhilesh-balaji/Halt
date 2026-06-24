@@ -13,7 +13,7 @@ import Halt.Helpers
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
-open Cslib.Turing SingleTapeTM Halt.Encoding
+open Cslib.Turing SingleTapeTM Halt.Helpers Halt.Encoding
 
 namespace Halt.Compositions
 

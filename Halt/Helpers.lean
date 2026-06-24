@@ -1,17 +1,8 @@
-import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
-import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
-import Mathlib.Tactic
-import Mathlib.Data.Nat.SuccPred
+import Mathlib.Logic.Relation
 
-import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
+namespace Halt.Helpers
 
-variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
-
-open Cslib.Turing SingleTapeTM
-
-namespace Halt.Encoding
-
- lemma reflTransGen_diamond {α : Type*} {r : α → α → Prop}
+lemma reflTransGen_diamond {α : Type*} {r : α → α → Prop}
     (h_det : ∀ {a b c : α}, r a b → r a c → b = c) {a b c : α}
     (hab : Relation.ReflTransGen r a b)
     (hac : Relation.ReflTransGen r a c) :
@@ -23,3 +14,5 @@ namespace Halt.Encoding
     | inr h_c_b_int => grind
     | inl h_b_int_c =>
       rcases h_b_int_c.cases_head with h_eq | ⟨x, h_b_int_x, h_x_c⟩ <;> grind
+
+end Halt.Helpers
