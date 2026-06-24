@@ -9,7 +9,7 @@ import Halt.Compositions
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
-open Cslib.Turing SingleTapeTM Halt.Encoding Halt.Compositions
+open Cslib.Turing SingleTapeTM Halt.Encoding Halt.Compositions Halt.Helpers
 
 @[expose] public section
 
