@@ -1,12 +1,12 @@
-name = "Halt"
+name = "DiagonaLean"
 version = "0.1.0"
-defaultTargets = ["halt"]
+defaultTargets = ["diagonalean"]
 
 [[lean_lib]]
-name = "Halt"
+name = "DiagonaLean"
 
 [[lean_exe]]
-name = "halt"
+name = "diagonalean"
 root = "Main"
 
 [[require]]

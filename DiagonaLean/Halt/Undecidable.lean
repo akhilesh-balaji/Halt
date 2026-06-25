@@ -4,17 +4,16 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Aalok Thakkar and Akhilesh Balaji
 -/
 
-import Halt.Compositions
+import DiagonaLean.Halt.Compositions
 
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
-open Cslib.Turing SingleTapeTM Halt.Encoding Halt.Compositions Halt.Helpers
+open Cslib.Turing SingleTapeTM DiagonaLean.Halt.Encoding DiagonaLean.Halt.Compositions DiagonaLean.Halt.Helpers
 
 @[expose] public section
 
-namespace Halt.Undecidable
-
+namespace DiagonaLean.Halt.Undecidable
 
 /-- `SingleTapeTM.TransitionRelation` is deterministic. -/
 private lemma transitionRelation_det {tm : SingleTapeTM Bool}
@@ -252,4 +251,4 @@ theorem halt_undecidable :
   rintro ⟨D, h_dec⟩
   exact self_halt_undecidable (self_halt_decider_if_halt_decider h_dec)
 
-end Halt.Undecidable
+end DiagonaLean.Halt.Undecidable
