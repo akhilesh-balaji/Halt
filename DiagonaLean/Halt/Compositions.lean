@@ -6,16 +6,15 @@ Authors: Akhilesh Balaji and Aristotle (Harmonic).
 
 import Mathlib.Tactic
 
-import Halt.Basic
+import DiagonaLean.Halt.Basic
+import DiagonaLean.Halt.Helpers
 import Mathlib.Data.Nat.SuccPred
-
-import Halt.Helpers
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
-open Cslib.Turing SingleTapeTM Halt.Helpers Halt.Encoding
+open Cslib.Turing SingleTapeTM DiagonaLean.Halt.Helpers DiagonaLean.Halt.Encoding
 
-namespace Halt.Compositions
+namespace DiagonaLean.Halt.Compositions
 
 def compCfgL (tm1 tm2 : SingleTapeTM Symbol) : tm1.Cfg → (compComputer tm1 tm2).Cfg
   | ⟨some q, t⟩ => ⟨some (Sum.inl q), t⟩
@@ -128,7 +127,6 @@ def pairSelfTM : SingleTapeTM Bool := {
         | some _ => (⟨sym, some .left⟩, some .finL)
         | none   => (⟨none, some .right⟩, none)
 }
-
 
 namespace PairSelf
 open PairSelfState
@@ -463,4 +461,4 @@ theorem pairSelfTM_correct (w : List Bool) :
     simpa [SingleTapeTM.haltCfg] using congrArg SingleTapeTM.Cfg.BiTape h
   exact mk₁_injective this
 
-end Halt.Compositions
+end DiagonaLean.Halt.Compositions

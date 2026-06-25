@@ -10,7 +10,7 @@ variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
 open Cslib.Turing SingleTapeTM
 
-namespace Halt.Encoding
+namespace DiagonaLean.Halt.Encoding
 
 /- From Hopcroft et al.'s textbook: δ(qi, Xj ) = (qk, Xl, Dm), for some integers i, j , k, l, and
 m. We shall code this rule by the string 0i 10j 10k 10l 10m. Notice that, since all of i, j , k, l,
@@ -112,4 +112,4 @@ noncomputable def encodeBoolTr (tm : SingleTapeTM Bool) [DecidableEq tm.State] :
 noncomputable def encodeBoolTM (tm : SingleTapeTM Bool) [DecidableEq tm.State] : List Bool :=
   encodeNat (Fintype.card tm.State) ++ List.replicate 3 true ++ encodeBoolTr tm
 
-end Halt.Encoding
+end DiagonaLean.Halt.Encoding

@@ -5,13 +5,13 @@ Authors: Aalok Thakkar and Akhilesh Balaji
 -/
 
 import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
-import Halt.Encoding
+import DiagonaLean.Halt.Encoding
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
-open Cslib.Turing SingleTapeTM Halt.Encoding
+open Cslib.Turing SingleTapeTM DiagonaLean.Halt.Encoding
 
-namespace Halt
+namespace DiagonaLean.Halt
 
 /-- Halts at `state=none`. -/
 def Halts (tm : SingleTapeTM Symbol) (w : List Symbol) : Prop :=
@@ -59,5 +59,5 @@ def IsSelfHaltDecider (D : SingleTapeTM Bool) : Prop :=
     (¬ Halts tm (encodeBoolTM tm) →
       SingleTapeTM.Outputs D (encodeBoolTM tm) [false])
 
-end Halt
+end DiagonaLean.Halt
 

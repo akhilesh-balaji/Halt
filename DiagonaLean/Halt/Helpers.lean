@@ -1,6 +1,6 @@
 import Mathlib.Logic.Relation
 
-namespace Halt.Helpers
+namespace DiagonaLean.Halt.Helpers
 
 lemma reflTransGen_diamond {α : Type*} {r : α → α → Prop}
     (h_det : ∀ {a b c : α}, r a b → r a c → b = c) {a b c : α}
@@ -15,4 +15,4 @@ lemma reflTransGen_diamond {α : Type*} {r : α → α → Prop}
     | inl h_b_int_c =>
       rcases h_b_int_c.cases_head with h_eq | ⟨x, h_b_int_x, h_x_c⟩ <;> grind
 
-end Halt.Helpers
+end DiagonaLean.Halt.Helpers
