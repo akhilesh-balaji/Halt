@@ -46,7 +46,8 @@ def Ambiguous (G : ContextFreeGrammar T) : Prop :=
 end ContextFreeGrammar
 
 namespace DiagonaLean.AmbigCFG
+open ContextFreeGrammar
 
-abbrev AmbigCFG : ContextFreeGrammar T → Prop := ContextFreeGrammar.Ambiguous
+abbrev AmbigCFG : ContextFreeGrammar T → Prop := Ambiguous
 
 end DiagonaLean.AmbigCFG
