@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import Halt.Basic
+import Mathlib.Data.Nat.Log
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
@@ -10,27 +11,44 @@ open Cslib.Turing SingleTapeTM Halt.Encoding
 
 namespace Halt.Helpers
 
-/-- A TM `M_B` on alphabet `B` simulates a TM `M_A` on alphabet `A` if there are encoding functions
-for the input and output such that `M_B` correctly reproduces the output of `M_A`. -/
-def SimulatesOut {A B : Type} [Inhabited A] [Fintype A] [Inhabited B] [Fintype B]
+/-! Universal alphabet encoding -/
+
+noncomputable def symbolBitWidth (Symbol : Type) [Fintype Symbol] : ℕ :=
+  max 1 (Nat.log2 (Fintype.card Symbol - 1) + 1)
+
+/-- Encode a natural number `n` as a fixed-width binary string of
+length `w` (little-endian). -/
+def natToBits (w n : ℕ) : List Bool :=
+  (List.range w).map fun i => n / 2 ^ i % 2 == 1
+
+/-- Encode a single symbol as a fixed-width binary string via its
+Fintype.equivFin index. -/
+noncomputable def encodeSymbol (s : Symbol) : List Bool :=
+  natToBits (symbolBitWidth Symbol) (Fintype.equivFin Symbol s).val
+
+noncomputable def encodeSymbolList (w : List Symbol) : List Bool :=
+  w.flatMap encodeSymbol
+
+def SimulatesVia {A B : Type} [Inhabited A] [Fintype A] [Inhabited B] [Fintype B]
     (M_A : SingleTapeTM A) (M_B : SingleTapeTM B)
-    (encIn : List A → List B) (encOut : List A → List B) : Prop :=
-  ∀ w out, SingleTapeTM.Outputs M_A w out ↔ SingleTapeTM.Outputs M_B (encIn w) (encOut out)
+    (enc : List A → List B) : Prop :=
+  ∀ w out, SingleTapeTM.Outputs M_A w out ↔ SingleTapeTM.Outputs M_B (enc w) (enc out)
 
-/-- Every TM on a non-Boolean alphabet can be simulated by a TM on a Boolean alphabet. -/
+/-- Every TM on a `Symbol` alphabet can be simulated by a TM on a
+Boolean alphabet, using the universal `encodeSymbolList` encoding. -/
 theorem symbol_simulated_by_bool (M : SingleTapeTM Symbol) :
-    ∃ (M' : SingleTapeTM Bool) (encIn : List Symbol → List Bool) (encOut : List Symbol → List Bool),
-      SimulatesOut M M' encIn encOut := by
+    ∃ (M' : SingleTapeTM Bool),
+      SimulatesVia M M' encodeSymbolList := by
   sorry
 
-/-- Every TM on a Boolean alphabet can be simulated by a TM on a non-Boolean alphabet. -/
+/-- Every TM on a Boolean alphabet can be simulated by a TM on a
+`Symbol` alphabet, via some encoding. -/
 theorem bool_simulated_by_symbol (M : SingleTapeTM Bool) :
-    ∃ (M' : SingleTapeTM Symbol) (encIn : List Bool → List Symbol) (encOut : List Bool → List Symbol),
-      SimulatesOut M M' encIn encOut := by
+    ∃ (M' : SingleTapeTM Symbol) (enc : List Bool → List Symbol),
+      SimulatesVia M M' enc := by
   sorry
 
-/-- Equivalence of Self-Halt Deciders between alphabets.
-This relies on the fact that deciders output specific boolean sequences, which are mapped through `encodeListBool`. -/
+/-- Equivalence of Self-Halt Deciders between alphabets. -/
 theorem decider_equiv_self_halt :
     (∃ D : SingleTapeTM Symbol, IsSelfHaltDecider D) ↔ (∃ D' : SingleTapeTM Bool, IsSelfHaltDeciderBool D') := by
   sorry
