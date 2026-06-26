@@ -6,10 +6,8 @@ Authors: Akhilesh Balaji and Aristotle (Harmonic).
 
 import Mathlib.Tactic
 
-import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
 import Halt.Basic
-import Halt.Encoding
-import Halt.Diagonal
+import Mathlib.Data.Nat.SuccPred
 
 variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
 
@@ -266,7 +264,8 @@ lemma macro_step (w : List Bool) (i : ℕ) (hi : i < w.length) :
       (cfgOf .start (startLeft w (i+1)) (startRight w (i+1))) := by
   convert Relation.ReflTransGen.trans ( Relation.ReflTransGen.head _ _ ) _ using 1
   exact cfgOf (.fwd1 ( w[i]! )) ( none :: startLeft w i )
-    ( w.drop ( i + 1 ) |> List.map some |> List.append <| none :: none :: ( w.take i |> List.map some ) )
+    ( w.drop ( i + 1 ) |> List.map some |> List.append <| none :: none ::
+      ( w.take i |> List.map some ) )
   exact cfgOf ( .fwd1 w[i]! ) ( ( w.drop ( i + 1 ) |> List.reverse |> List.map some ) ++
     none :: startLeft w i ) ( none :: none :: List.map some ( List.take i w ) )
   · convert step_right _ using 1
@@ -284,7 +283,8 @@ lemma macro_step (w : List Bool) (i : ℕ) (hi : i < w.length) :
   · convert Relation.ReflTransGen.trans ( Relation.ReflTransGen.head _ _ ) _ using 1
     exact cfgOf ( .fwd2 w[i]! ) ( none :: List.map some ( List.drop ( i + 1 ) w ).reverse ++
       none :: startLeft w i ) ( none :: List.map some ( List.take i w ) )
-    exact cfgOf ( .fwd3 w[i]! ) ( none :: none :: List.map some ( List.drop ( i + 1 ) w ).reverse ++
+    exact cfgOf ( .fwd3 w[i]! ) ( none :: none :: List.map some
+      ( List.drop ( i + 1 ) w ).reverse ++
       none :: startLeft w i ) ( List.map some ( List.take i w ) )
     · convert step_right _ using 1
       all_goals first
@@ -298,15 +298,19 @@ lemma macro_step (w : List Bool) (i : ℕ) (hi : i < w.length) :
       exact List.take i w
       exact none :: none :: List.map some ( List.drop ( i + 1 ) w ).reverse ++ none :: startLeft w i
       exact [ ]
-      · convert run_deposit w[i]! ( List.reverse ( List.take i w ) ) ( none :: List.map some ( List.drop ( i + 1 ) w ).reverse ++ none :: startLeft w i )
+      · convert run_deposit w[i]! ( List.reverse ( List.take i w ) ) ( none :: List.map some
+        ( List.drop ( i + 1 ) w ).reverse ++ none :: startLeft w i )
           |> Relation.ReflTransGen.trans <| Relation.ReflTransGen.head _ _ using 1
         simp
-        exact cfgOf ( PairSelfState.ret2 w[i]! ) ( List.map some ( List.drop ( i + 1 ) w ).reverse ++ none :: startLeft w i ) ( none :: none :: List.map some ( List.take i w ).reverse.reverse ++ [ some w[i]! ] )
+        exact cfgOf ( PairSelfState.ret2 w[i]! ) ( List.map some ( List.drop ( i + 1 ) w ).reverse
+          ++ none :: startLeft w i ) ( none :: none :: List.map some
+            ( List.take i w ).reverse.reverse ++ [ some w[i]! ] )
         · convert step_left _ using 1
           unfold pairSelfTM
           all_goals first
             | rfl
-        · convert run_restore w[i]! ( List.reverse ( List.drop ( i + 1 ) w ) ) ( startLeft w i ) ( List.map some ( List.take i w ).reverse.reverse ++ [ some w[i]! ] ) using 1
+        · convert (run_restore w[i]! ( List.reverse ( List.drop ( i + 1 ) w ) ) ( startLeft w i )
+          ( List.map some ( List.take i w ).reverse.reverse ++ [ some w[i]! ] )) using 1
           simp +decide [ startLeft ]
           cases h : w[i]?
           · grind
