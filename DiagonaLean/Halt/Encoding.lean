@@ -4,9 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Akhilesh Balaji
 -/
 
+
 import Cslib.Computability.Machines.Turing.SingleTape.Deterministic
 
-variable {Symbol : Type} [Inhabited Symbol] [Fintype Symbol]
+
 
 open Cslib.Turing SingleTapeTM
 
@@ -38,11 +39,13 @@ def decodeNat (l : List Bool) : Option ℕ :=
   else none
 
 @[simp]
-lemma decodeNat_encodeNat (n : ℕ) : decodeNat (encodeNat n) = n := by
+lemma decodeNat_encodeNat (n : ℕ) : decodeNat (encodeNat n) = some n := by
   simp [decodeNat, encodeNat, List.all_replicate, List.length_replicate]
 
 def encodePair (a b : List Bool) : List Bool :=
   a ++ [true, true] ++ b
+
+def decodePair (l : List Bool) : Option (List Bool × List Bool):= sorry
 
 /-- The binary string `w` is the binary number `[1w]_2 ∈ ℕ`. -/
 def enumeratedBinaryString (w : List Bool) : ℕ :=
@@ -63,10 +66,6 @@ private lemma foldl_eq (w : List Bool) (k : ℕ) :
     rw [ih, ih']
     ring
 
-noncomputable def symbolIdx [DecidableEq Symbol] (s : Option Symbol) : ℕ :=
-  match s with
-  | none   => 1
-  | some s => (Fintype.equivFin Symbol s).val + 2
 
 def dirIdx (d : Option Turing.Dir) : ℕ :=
   match d with
@@ -74,16 +73,68 @@ def dirIdx (d : Option Turing.Dir) : ℕ :=
   | some Turing.Dir.right => 2
   | none           => 3
 
+
+def decodeDirIdx (n : ℕ) : Option (Option Turing.Dir) :=
+ match n with
+ | 1 => some (some Turing.Dir.left)
+ | 2 => some (some Turing.Dir.right)
+ | 3 => some none
+ | _ => none
+
+@[simp]
+lemma decodeDirIdx_dirIdx (d : Option Turing.Dir) : decodeDirIdx (dirIdx d) = some d := by
+  cases d with
+  | none => rfl
+  | some dir =>
+    cases dir with
+    | left => rfl
+    | right => rfl
+
 def boolSymbolIdx (s : Option Bool) : ℕ :=
   match s with
   | some false => 1  -- X1 = 0
   | some true  => 2  -- X2 = 1
   | none       => 3  -- X3 = blank
 
+def decodeBoolSymbolIdx (n : ℕ) : Option (Option Bool) :=
+  match n with
+    | 1 => some (some false)
+    | 2 => some (some true)
+    | 3 => some none
+    | _ => none
+
+@[simp]
+lemma decodeBoolSymbolIdx_boolSymbolIdx (d : Option Bool) : decodeBoolSymbolIdx (boolSymbolIdx (d)) = some d := by
+  cases  d with
+  | none => rfl
+  | some  Bool =>
+     cases Bool with
+      | true => rfl
+      | false => rfl
+
 noncomputable def boolStateIdx (tm : SingleTapeTM Bool) [DecidableEq tm.State]
     (q : tm.State) : ℕ :=
   if q == tm.q₀ then 1
   else Finset.univ.toList.findIdx (· == q) + 2
+
+noncomputable def decodeBoolStateIdx (tm : SingleTapeTM Bool) [DecidableEq tm.State] (n : ℕ) : Option (tm.State) :=  /- why option here and again understand the mechanics completely for this decoder-/
+  match n with
+  | 0 => none
+  | 1 => some tm.q₀
+  | n + 2 => (Finset.univ.toList)[n]?
+
+@[simp]
+lemma decodeBoolStateIdx_boolStateIdx (tm : SingleTapeTM Bool) [DecidableEq tm.State]
+    (q : tm.State) : decodeBoolStateIdx tm (boolStateIdx tm q) = some q := by
+  unfold boolStateIdx decodeBoolStateIdx
+  grind +suggestions
+/-- `boolStateIdx tm` is injective: distinct states get distinct codes. -/
+
+lemma boolStateIdx_injective (tm : SingleTapeTM Bool) [DecidableEq tm.State] :
+    Function.Injective (boolStateIdx tm) := by
+  intro q1 q2 h
+  replace h := congr_arg (fun x => decodeBoolStateIdx tm x) h
+  simpa using h
 
 noncomputable def encodeBoolTransition (tm : SingleTapeTM Bool) [DecidableEq tm.State]
     (q : tm.State) (x : Option Bool)
@@ -98,6 +149,8 @@ noncomputable def encodeBoolTransition (tm : SingleTapeTM Bool) [DecidableEq tm.
   encodeNat k ++ [true] ++
   encodeNat l ++ [true] ++
   encodeNat m
+
+
 
 noncomputable def encodeBoolTr (tm : SingleTapeTM Bool) [DecidableEq tm.State] : List Bool :=
   let states := (@Finset.univ tm.State tm.stateFintype).toList
